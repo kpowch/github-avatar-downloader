@@ -1,4 +1,3 @@
-// require 'request' and the Node 'fs' (filesystem) modules
 var request = require('request');
 var fs = require('fs');
 
@@ -8,8 +7,8 @@ var GITHUB_USER = "kpowch";
 var GITHUB_TOKEN = "b23281cab5c0a4a15f1cd9c82ef317201c2a9359";
 
 
-// use request library to programmatically fetch the list of contributors
-// via HTTPS for given repo.
+// Makes a request for JSON, getting back an array of contributors via HTTPS for given repo.
+// Passes data to cb, an anonymous callback function that it's given.
 function getRepoContributors(repoOwner, repoName, cb) {
   var requestURL = 'https://' + GITHUB_USER + ':' + GITHUB_TOKEN + '@api.github.com/repos/' + repoOwner + '/' + repoName + '/contributors';
   // console.log(requestURL);
@@ -26,44 +25,46 @@ function getRepoContributors(repoOwner, repoName, cb) {
     if (err) {
       throw err;
     }
-    console.log('statusCode:', response && response.statusCode);
+    console.log('Status Code for getting repo contributors:', response && response.statusCode);
 
     var contributorObj = JSON.parse(body);
 
     cb(err, contributorObj);
+
+    return contributorObj; // do i need to do this?
   });
 }
 
-getRepoContributors("jquery", "jquery", function(err, result) {
+
+// Loops through each item in the contributors array and constructs the files path
+// using the login value (e.g. 'avatars/dhh.jpg').
+// Then passes avatar_url and file path to downloadImageByURL.
+getRepoContributors("jquery", "jquery", function (err, result) {
   console.log('Errors:', err);
-  var arrayOfURLS = [];
+
+  var loginAndURLdata = {};
+
   for (prop in result) {
-    //console.log(result[prop].avatar_url);
-    arrayOfURLS.push(result[prop].avatar_url);
+    downloadImageByURL(result[prop].avatar_url, result[prop].login + '.jpg');
+
+    // just saving the data in case i need it for something else
+    loginAndURLdata[result[prop].login] = result[prop].avatar_url;
   }
-  // console.log(arrayOfURLS);
-  return arrayOfURLS;
+  return loginAndURLdata; // do i need to do this?
 });
 
+
+// Fetches desired avatar_url and saves the image to given filePath.
 function downloadImageByURL(url, filePath) {
   request.get(url)
-       .on('error', function (err) {
-         throw err;
-       })
-       .on('data', function (data) {
-         //console.log('Getting data...');
-       })
-       .on('end', function () {
-         console.log('Downloading image...');
-       })
-       .on('response', function (response) {
-         // console.log('Response Status Code:', response.statusCode);
-         // console.log('Content type:', response.headers['content-type']);
-       })
-       .pipe(fs.createWriteStream(filePath))
-       .on('finish', function() {
-         console.log('Download complete!');
-       });
+         .on('error', function (err) {
+           throw err;
+         })
+         .on('end', function () {
+          //  console.log('Downloading image...');
+         })
+         .pipe(fs.createWriteStream("avatars/" + filePath))
+         .on('finish', function() {
+          //  console.log('Download complete!');
+         });
 }
-
-downloadImageByURL("https://avatars2.githubusercontent.com/u/2741?v=3&s=466", "avatars/kvirani.jpg")
