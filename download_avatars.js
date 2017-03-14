@@ -25,28 +25,20 @@ function getRepoContributors(repoOwner, repoName, cb) {
   };
 
   if (!repoOwner || ! repoName) {
-    console.log('You must specify the repo owner and name!');
-    return false;
+    return cb('You must specify the repo owner and name');
   }
 
   request(options, function (err, response, body) {
     if (err) {
-      console.log('AH! Error:', err);
-      return false;
+      return cb(err);
     }
     if (response && response.statusCode !== 200) {
-      console.log("Response was not 200! It's", response.statusCode);
-      console.log("Consider checking if the repo exists, and/or your repo owner/name syntax");
-      return false;
+      return cb('Failed to find repository and/or user.');
     }
 
     var contributorObj = JSON.parse(body);
 
-    if (contributorObj && contributorObj.length) {
-      cb(err, contributorObj);
-    } else {
-      console.log(`Nothing found.`);
-    }
+    cb(null, contributorObj);
   });
 }
 
@@ -55,20 +47,14 @@ function getRepoContributors(repoOwner, repoName, cb) {
 // using the login value (e.g. 'avatars/dhh.jpg').
 // Then passes avatar_url and file path to downloadImageByURL.
 getRepoContributors(repoOwner, repoName, function (err, result) {
-  console.log('Errors:', err);
-
-  var loginAndURLdata = {};
+  if (err) {
+    return console.log(err);
+  }
 
   for (prop in result) {
     downloadImageByURL(result[prop].avatar_url, result[prop].login + '.jpg');
-
-    // just saving the data in case i need it for something else
-    loginAndURLdata[result[prop].login] = result[prop].avatar_url;
   }
   console.log('Downloading... check download folder!');
-
-  // not really necessary
-  return loginAndURLdata;
 });
 
 
@@ -82,7 +68,6 @@ function downloadImageByURL(url, filePath) {
   request.get(url)
          .on('error', function (err) {
            console.log('Error downloading image(s):', err);
-           return false;
          })
          .on('end', function () {
           //  console.log('Downloading image...');
