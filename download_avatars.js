@@ -26,11 +26,21 @@ function getRepoContributors(repoOwner, repoName, cb) {
       throw err;
     }
     console.log('statusCode:', response && response.statusCode);
-    console.log(JSON.parse(body));
+
+    var contributorObj = JSON.parse(body);
+
+    cb(contributorObj);
   });
 }
 
-getRepoContributors("jquery", "jquery", function(err, result) {
-  console.log("Errors:", err);
-  console.log("Result:", result);
+getRepoContributors("jquery", "jquery", function(object) {
+  for (prop in object) {
+    console.log(object[prop].avatar_url);
+  }
 });
+
+
+// getRepoContributors("jquery", "jquery", function(err, result) {
+//   console.log("Errors:", err);
+//   console.log("Result:", result);
+// });
