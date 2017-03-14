@@ -66,7 +66,9 @@ getRepoContributors(repoOwner, repoName, function (err, result) {
     loginAndURLdata[result[prop].login] = result[prop].avatar_url;
   }
   console.log('Downloading... check download folder!');
-  return loginAndURLdata; // do i need to do this?
+
+  // not really necessary
+  return loginAndURLdata;
 });
 
 
