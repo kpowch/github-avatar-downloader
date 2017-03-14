@@ -1,7 +1,8 @@
 # GitHub Avatar Downloader
-Taken from <a>https://web-compass.lighthouselabs.ca/projects/w2-github-avatars</a>  
+## W2D1 Project 1
+[Project link](https://web-compass.lighthouselabs.ca/projects/w2-github-avatars)
 
-As on 2017-03-13
+As of 2017-03-13
 
 ## Problem Statement
 
