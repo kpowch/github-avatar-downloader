@@ -1,6 +1,9 @@
 var request = require('request');
 var fs = require('fs');
 
+var repoOwner = process.argv[2];
+var repoName = process.argv[3];
+
 console.log('Welcome to the GitHub Avatar Downloader!!');
 
 var GITHUB_USER = "kpowch";
@@ -21,17 +24,29 @@ function getRepoContributors(repoOwner, repoName, cb) {
     }
   };
 
+  if (!repoOwner || ! repoName) {
+    console.log('You must specify the repo owner and name!');
+    return false;
+  }
+
   request(options, function (err, response, body) {
     if (err) {
-      throw err;
+      console.log('AH! Error:', err);
+      return false;
     }
-    console.log('Status Code for getting repo contributors:', response && response.statusCode);
+    if (response && response.statusCode !== 200) {
+      console.log("Response was not 200! It's", response.statusCode);
+      console.log("Consider checking if the repo exists, and/or your repo owner/name syntax");
+      return false;
+    }
 
     var contributorObj = JSON.parse(body);
 
-    cb(err, contributorObj);
-
-    return contributorObj; // do i need to do this?
+    if (contributorObj && contributorObj.length) {
+      cb(err, contributorObj);
+    } else {
+      console.log(`Nothing found.`);
+    }
   });
 }
 
@@ -39,7 +54,7 @@ function getRepoContributors(repoOwner, repoName, cb) {
 // Loops through each item in the contributors array and constructs the files path
 // using the login value (e.g. 'avatars/dhh.jpg').
 // Then passes avatar_url and file path to downloadImageByURL.
-getRepoContributors("jquery", "jquery", function (err, result) {
+getRepoContributors(repoOwner, repoName, function (err, result) {
   console.log('Errors:', err);
 
   var loginAndURLdata = {};
@@ -50,6 +65,7 @@ getRepoContributors("jquery", "jquery", function (err, result) {
     // just saving the data in case i need it for something else
     loginAndURLdata[result[prop].login] = result[prop].avatar_url;
   }
+  console.log('Downloading... check download folder!');
   return loginAndURLdata; // do i need to do this?
 });
 
