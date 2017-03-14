@@ -74,14 +74,20 @@ getRepoContributors(repoOwner, repoName, function (err, result) {
 
 // Fetches desired avatar_url and saves the image to given filePath.
 function downloadImageByURL(url, filePath) {
+  // make the /avatars director if it doesn't exist
+  if (!fs.existsSync("./avatars/")) {
+    fs.mkdirSync("./avatars/");
+  }
+
   request.get(url)
          .on('error', function (err) {
-           throw err;
+           console.log('Error downloading image(s):', err);
+           return false;
          })
          .on('end', function () {
           //  console.log('Downloading image...');
          })
-         .pipe(fs.createWriteStream("avatars/" + filePath))
+         .pipe(fs.createWriteStream("./avatars/" + filePath))
          .on('finish', function() {
           //  console.log('Download complete!');
          });
